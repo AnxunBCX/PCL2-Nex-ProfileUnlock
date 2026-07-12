@@ -1,6 +1,14 @@
 {
   "versions": [
     {
+      "version": "2.1.1",
+      "packageUrl": "https://github.com/AnxunBCX/PCL2-Nex-ProfileUnlock/releases/download/v2.1.1/cn.pclnex.offline-login-v2.1.1.pclx",
+      "sha256": "78303dac4a42c4fd5ba697d2e0b3617af8134accc8fe8e0e9a54a94066d240a2",
+      "minApiVersion": "1.1.0.0",
+      "minHostVersion": "3.0.2",
+      "releaseNotes": ""
+    },
+    {
       "version": "2.1.0",
       "packageUrl": "https://github.com/AnxunBCX/PCL2-Nex-ProfileUnlock/releases/download/v2.1.0/cn.pclnex.offline-login-v2.1.0.pclx",
       "sha256": "0cd44957ca272ea370b9e43aad32d0f515c8bda01c0bdfe7b1c9bc09e32fbb97",
