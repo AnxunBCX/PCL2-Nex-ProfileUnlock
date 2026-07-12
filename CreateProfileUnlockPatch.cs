@@ -138,6 +138,35 @@ internal static class CreateProfileUnlockPatch
             _ => "Legacy"
         };
         refreshPage.Invoke(launchLeft, [true, Enum.Parse(mcLoginType, loginType)]);
+        if (loginType == "Legacy" && _window is not null)
+            _window.Dispatcher.BeginInvoke(RenameStandardUuidOption);
+    }
+
+    private static void RenameStandardUuidOption()
+    {
+        if (_window is null)
+            return;
+
+        var radio = FindDescendant(_window, "RadioUuidStandard", "PCL.MyRadioBox");
+        radio?.GetType().GetProperty("Text", BindingFlags.Public | BindingFlags.Instance)
+            ?.SetValue(radio, "一般");
+    }
+
+    private static FrameworkElement? FindDescendant(DependencyObject parent, string name, string typeName)
+    {
+        for (var index = 0; index < VisualTreeHelper.GetChildrenCount(parent); index++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, index);
+            if (child is FrameworkElement element && element.Name == name &&
+                string.Equals(element.GetType().FullName, typeName, StringComparison.Ordinal))
+                return element;
+
+            var match = FindDescendant(child, name, typeName);
+            if (match is not null)
+                return match;
+        }
+
+        return null;
     }
 
     private static string GetLocalizedText(string key)
