@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AssemblyName>PclOfflineLogin</AssemblyName>
     <RootNamespace>PclOfflineLogin</RootNamespace>
-    <Version>2.1.1</Version>
+    <Version>2.1.2</Version>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 

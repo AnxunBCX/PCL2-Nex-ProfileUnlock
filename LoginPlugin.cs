@@ -7,7 +7,7 @@ namespace PclOfflineLogin;
 [Plugin(
     id: "cn.pclnex.offline-login",
     name: "档案创建解锁",
-    version: "2.1.1.0",
+    version: "2.1.2.0",
     Author = "AnxunBCX",
     Description = "新建档案时始终显示正版、第三方与离线选项，无需先登录正版账号。",
     MinApiVersion = "1.1.0.0",

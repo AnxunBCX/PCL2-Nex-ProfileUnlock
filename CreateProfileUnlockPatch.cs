@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace PclOfflineLogin;
 
@@ -12,6 +13,7 @@ internal static class CreateProfileUnlockPatch
 {
     private static Window? _window;
     private static MouseButtonEventHandler? _mouseHandler;
+    private static Action<string>? _logInfo;
     private static bool _handling;
 
     internal static void Apply(Action<string> logInfo)
@@ -21,6 +23,7 @@ internal static class CreateProfileUnlockPatch
 
         _window = Application.Current?.MainWindow
             ?? throw new InvalidOperationException("PCL 主窗口尚未创建。");
+        _logInfo = logInfo;
         _mouseHandler = OnPreviewMouseLeftButtonDown;
         _window.AddHandler(UIElement.PreviewMouseLeftButtonDownEvent, _mouseHandler, true);
         logInfo("档案创建选项事件拦截器已注册。");
@@ -43,6 +46,7 @@ internal static class CreateProfileUnlockPatch
         finally
         {
             _mouseHandler = null;
+            _logInfo = null;
             _window = null;
             _handling = false;
         }
@@ -139,34 +143,33 @@ internal static class CreateProfileUnlockPatch
         };
         refreshPage.Invoke(launchLeft, [true, Enum.Parse(mcLoginType, loginType)]);
         if (loginType == "Legacy" && _window is not null)
-            _window.Dispatcher.BeginInvoke(RenameStandardUuidOption);
+            _window.Dispatcher.BeginInvoke(
+                DispatcherPriority.ContextIdle,
+                RenameStandardUuidOption);
     }
 
     private static void RenameStandardUuidOption()
     {
-        if (_window is null)
-            return;
-
-        var radio = FindDescendant(_window, "RadioUuidStandard", "PCL.MyRadioBox");
-        radio?.GetType().GetProperty("Text", BindingFlags.Public | BindingFlags.Instance)
-            ?.SetValue(radio, "一般");
-    }
-
-    private static FrameworkElement? FindDescendant(DependencyObject parent, string name, string typeName)
-    {
-        for (var index = 0; index < VisualTreeHelper.GetChildrenCount(parent); index++)
+        var modMain = FindType("PCL.ModMain");
+        var offlinePage = modMain?.GetField(
+            "frmLoginOffline",
+            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)?.GetValue(null);
+        if (offlinePage is not FrameworkElement page)
         {
-            var child = VisualTreeHelper.GetChild(parent, index);
-            if (child is FrameworkElement element && element.Name == name &&
-                string.Equals(element.GetType().FullName, typeName, StringComparison.Ordinal))
-                return element;
-
-            var match = FindDescendant(child, name, typeName);
-            if (match is not null)
-                return match;
+            _logInfo?.Invoke("未找到离线登录页面，未修改 UUID 选项文字。");
+            return;
         }
 
-        return null;
+        var radio = page.FindName("RadioUuidStandard");
+        var textProperty = radio?.GetType().GetProperty("Text", BindingFlags.Public | BindingFlags.Instance);
+        if (radio is null || textProperty is null)
+        {
+            _logInfo?.Invoke("未找到 RadioUuidStandard，未修改 UUID 选项文字。");
+            return;
+        }
+
+        textProperty.SetValue(radio, "一般");
+        _logInfo?.Invoke("离线登录 UUID 选项文字已改为“一般”。");
     }
 
     private static string GetLocalizedText(string key)
